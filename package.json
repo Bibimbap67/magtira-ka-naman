@@ -1,0 +1,10 @@
+{
+  "name": "magtira-ka-naman",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome/Brave extension that turns your AI chat tokens into water, in mL and L, from a glass to Atlantis.",
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "icons": "node tools/make-icons.js"
+  }
+}

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Water Bill</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <img src="../icons/icon48.png" alt="" width="40" height="40" />
+      <div>
+        <h1>Water Bill</h1>
+        <p class="period" id="period"></p>
+      </div>
+    </header>
+
+    <main class="card">
+      <p class="label">Today</p>
+      <p class="num" id="today-num">0</p>
+      <p class="unit" id="today-unit">mL</p>
+      <p class="low" id="today-low">or as little as 0 mL</p>
+
+      <div class="glass-wrap" id="glass-wrap">
+        <svg class="ticks" viewBox="0 0 24 60" aria-hidden="true">
+          <path d="M20 10 L8 2 M22 30 H6 M20 50 L8 58" />
+        </svg>
+        <svg class="ticks ticks-right" viewBox="0 0 24 60" aria-hidden="true">
+          <path d="M4 10 L16 2 M2 30 H18 M4 50 L16 58" />
+        </svg>
+      </div>
+
+      <!-- Glass → Tumbler → … → Atlantis. Unreached ones stay a mystery. -->
+      <ol class="ladder" id="ladder" aria-label="Containers"></ol>
+
+      <p class="quip" id="today-quip"></p>
+
+      <section class="equiv" aria-labelledby="equiv-title">
+        <p class="label" id="equiv-title">Token equivalent</p>
+        <div class="equiv-row">
+          <div class="equiv-item">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <ellipse cx="12" cy="6" rx="8" ry="3" />
+              <path d="M4 6 V11 C4 12.7 7.6 14 12 14 S20 12.7 20 11 V6" />
+              <path d="M4 11 V16 C4 17.7 7.6 19 12 19 S20 17.7 20 16 V11" />
+            </svg>
+            <div>
+              <strong id="tokens">~0 tokens</strong>
+              <span>1 token ≈ 0.0005–0.05 mL</span>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="equiv-item">
+            <svg class="icon icon-drop" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2.5 C15 7 19 10.5 19 15 A7 7 0 0 1 5 15 C5 10.5 9 7 12 2.5 Z" />
+            </svg>
+            <div>
+              <strong id="glass-pct">0% full</strong>
+              <span id="vessel-line">Glass · next: Tumbler</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="ai" aria-labelledby="ai-title">
+      <div class="ai-head">
+        <h2 id="ai-title">This month by AI</h2>
+        <strong id="month-high">up to 0 mL</strong>
+      </div>
+      <ul class="sites" id="sites"></ul>
+      <p class="rice" id="month-rice"></p>
+    </section>
+
+    <footer>
+      <label class="switch">
+        <input type="checkbox" id="show-widget" checked />
+        <span class="switch-track" aria-hidden="true"></span>
+        Show the glass on chat pages
+      </label>
+      <p class="fine">
+        Just an estimate: ~4 letters = 1 token, and 0.0005–0.05 mL of water per token
+        (based on Google, OpenAI and UC Riverside). Hidden "thinking" tokens aren't counted.
+        No chat text is saved or sent anywhere, only numbers.
+      </p>
+      <button id="reset" type="button">Reset bill</button>
+    </footer>
+
+    <script src="../src/sites.js"></script>
+    <script src="../src/water.js"></script>
+    <script src="../src/store.js"></script>
+    <script src="../src/glass.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+# Claude Code workflow files: kept locally, not published
+CLAUDE.md
+.claude/
+docs/superpowers/
+
+node_modules/
+Thumbs.db
+.DS_Store

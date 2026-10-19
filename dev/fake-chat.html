@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fake chat (dev)</title>
+    <link rel="stylesheet" href="../src/widget.css" />
+    <style>
+      body { margin: 0; font: 14px/1.5 system-ui, sans-serif; background: #fafafa; color: #222; }
+      main { max-width: 640px; margin: 0 auto; padding: 16px 16px 120px; }
+      [data-message-author-role] { margin: 10px 0; padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid #ddd; }
+      [data-message-author-role="user"] { background: #e8f1fe; }
+      form { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 12px; background: #fff; border-top: 1px solid #ddd; }
+      textarea { flex: 1; height: 44px; }
+      #debug { max-width: 640px; margin: 0 auto 120px; padding: 0 16px; font: 12px monospace; color: #555; white-space: pre-wrap; }
+      main { padding-bottom: 8px; }
+      @media (prefers-color-scheme: dark) {
+        body { background: #111; color: #ddd; }
+        [data-message-author-role], form { background: #1b1b1b; border-color: #333; }
+        [data-message-author-role="user"] { background: #16263d; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>Fake ChatGPT-style page for testing. The two messages below were "already here" and must <b>not</b> count.</p>
+      <a href="#old-chat">(link: pretend to open an old chat)</a>
+      <div id="thread">
+        <div data-message-author-role="user" data-message-id="old-1">An old question from yesterday.</div>
+        <div data-message-author-role="assistant" data-message-id="old-2">An old answer that was already counted before.</div>
+      </div>
+    </main>
+    <p id="debug"></p>
+    <form id="composer">
+      <textarea id="input" placeholder="Type a prompt, press Enter">Ano ang pinakamasarap na ulam sa Pilipinas?</textarea>
+      <button type="submit" aria-label="Send message" data-testid="send-button">Send</button>
+    </form>
+
+    <script src="chrome-mock.js"></script>
+    <script src="../src/sites.js"></script>
+    <script src="../src/tokens.js"></script>
+    <script src="../src/water.js"></script>
+    <script src="../src/store.js"></script>
+    <script src="../src/glass.js"></script>
+    <script src="../src/widget.js"></script>
+    <script>
+      // Pretend this page is chatgpt.com. Add ?fallback to test the "no selector matches" mode,
+      // or ?site=claude to build messages the way claude.ai does (data-testid, no message ids).
+      const params = new URLSearchParams(location.search);
+      const fallback = params.has('fallback');
+      const asClaude = params.get('site') === 'claude';
+      if (asClaude) {
+        for (const old of document.querySelectorAll('#thread [data-message-author-role]')) {
+          old.dataset.testid = old.dataset.messageAuthorRole === 'user' ? 'user-message' : 'assistant-message';
+          delete old.dataset.messageAuthorRole;
+          delete old.dataset.messageId;
+        }
+      }
+      MKN.detectSite = () => ({
+        id: asClaude ? 'claude' : 'chatgpt',
+        ...MKN.SITES[asClaude ? 'claude' : 'chatgpt'],
+        ...(fallback && { selectors: ['.selector-that-matches-nothing'] }),
+      });
+    </script>
+    <script src="../src/content.js"></script>
+    <script>
+      const thread = document.getElementById('thread');
+      const input = document.getElementById('input');
+      let n = 0;
+
+      function addMessage(role, text) {
+        const div = document.createElement('div');
+        if (asClaude) {
+          div.dataset.testid = role === 'user' ? 'user-message' : 'assistant-message';
+        } else {
+          div.dataset.messageAuthorRole = role;
+          div.dataset.messageId = `msg-${++n}`;
+        }
+        div.textContent = text;
+        thread.append(div);
+        return div;
+      }
+
+      // Streams a reply word by word, like a real chat.
+      function streamReply() {
+        const words = ('Adobo, sinigang, at kare-kare ang madalas na sagot. ' +
+          'Pero sa totoo lang, depende sa kung sino ang nagluto. ').repeat(4).trim().split(' ');
+        const div = addMessage('assistant', '');
+        let i = 0;
+        const timer = setInterval(() => {
+          div.textContent += (i ? ' ' : '') + words[i++];
+          if (i >= words.length) clearInterval(timer);
+        }, 40);
+      }
+
+      document.getElementById('composer').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!input.value.trim()) return;
+        addMessage('user', input.value.trim());
+        input.value = '';
+        setTimeout(streamReply, 300);
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          document.getElementById('composer').requestSubmit();
+        }
+      });
+
+      // Show what's in (fake) storage.
+      const debug = document.getElementById('debug');
+      const show = async () => (debug.textContent = 'storage: ' + JSON.stringify(await chrome.storage.local.get(null)));
+      chrome.storage.onChanged.addListener(show);
+      show();
+    </script>
+  </body>
+</html>

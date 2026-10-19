@@ -1,0 +1,179 @@
+/* Everything is scoped to #mkn-widget so the chat site's styles and ours don't mix.
+   One look in light and dark mode: a cream card with a navy glass, like the popup. */
+#mkn-widget {
+  all: initial;
+  --mkn-card: #fbf6ec;
+  --mkn-ink: #13233a;
+  --mkn-muted: #6b7a8c;
+  --mkn-blue: #2f8fe0;
+  --mkn-display: 'Segoe UI Variable Display', 'SF Pro Display', system-ui, sans-serif;
+
+  position: fixed;
+  right: 16px;
+  bottom: 140px;
+  z-index: 2147483646;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 280px;
+  padding: 8px 16px 8px 8px;
+  border-radius: 20px;
+  background: var(--mkn-card);
+  box-shadow: 0 10px 30px rgba(10, 22, 40, 0.28), 0 1px 3px rgba(10, 22, 40, 0.18);
+  color: var(--mkn-ink);
+  font: 12px/1.35 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+#mkn-widget * {
+  box-sizing: border-box;
+}
+
+#mkn-widget.mkn-dragging {
+  cursor: grabbing;
+  transform: scale(1.03);
+  box-shadow: 0 18px 44px rgba(10, 22, 40, 0.36);
+}
+
+/* The glass */
+
+#mkn-widget .mkn-toggle {
+  all: unset;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 52px;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+#mkn-widget .mkn-toggle:focus-visible {
+  outline: 2px solid var(--mkn-blue);
+  outline-offset: 2px;
+}
+
+#mkn-widget .mkn-glass {
+  display: block;
+  width: 40px;
+  height: 46px;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#mkn-widget .mkn-toggle:hover .mkn-glass {
+  transform: rotate(-6deg);
+}
+
+#mkn-widget .mkn-toggle:active .mkn-glass {
+  transform: rotate(-6deg) scale(0.92);
+}
+
+/* The numbers */
+
+#mkn-widget .mkn-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+#mkn-widget .mkn-high {
+  font-family: var(--mkn-display);
+  font-size: 19px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+#mkn-widget .mkn-pre {
+  color: var(--mkn-muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+#mkn-widget .mkn-low {
+  color: var(--mkn-muted);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#mkn-widget .mkn-quip {
+  margin-top: 3px;
+  min-height: 1.35em;
+}
+
+#mkn-widget .mkn-caret {
+  display: none;
+  width: 1.5px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: -0.12em;
+  background: currentColor;
+  animation: mkn-blink 0.9s steps(1) infinite;
+}
+
+#mkn-widget .mkn-typing .mkn-caret {
+  display: inline-block;
+}
+
+#mkn-widget .mkn-rest {
+  visibility: hidden;
+}
+
+@keyframes mkn-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* "Level 2: Tumbler 🧋" */
+
+#mkn-widget .mkn-badge {
+  position: absolute;
+  top: -12px;
+  left: 28px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--mkn-blue);
+  color: #ffffff;
+  font-family: var(--mkn-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(47, 143, 224, 0.35);
+}
+
+/* Collapsed: just the glass */
+
+#mkn-widget.mkn-collapsed {
+  gap: 0;
+  padding: 4px;
+  border-radius: 18px;
+}
+
+#mkn-widget.mkn-collapsed .mkn-body {
+  display: none;
+}
+
+/* Turned off in the popup */
+
+#mkn-widget.mkn-hidden {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mkn-widget,
+  #mkn-widget .mkn-glass {
+    transition: none;
+  }
+  #mkn-widget .mkn-caret {
+    animation: none;
+  }
+}

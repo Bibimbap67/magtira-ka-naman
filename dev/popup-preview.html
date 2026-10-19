@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Popup preview (dev)</title>
+    <style>
+      body { margin: 16px; font: 13px system-ui, sans-serif; background: #ddd; }
+      iframe { width: 372px; height: 900px; border: 0; border-radius: 8px; background: #fff; }
+    </style>
+  </head>
+  <body>
+    <p>The real popup/popup.html, with fake chrome.storage shared with fake-chat.html.</p>
+    <iframe id="popup" title="Popup"></iframe>
+    <script>
+      // Load the real popup page, add the chrome mock in front of its scripts.
+      fetch('../popup/popup.html')
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById('popup').srcdoc = html.replace(
+            '<head>',
+            '<head><base href="/popup/"><script src="/dev/chrome-mock.js"><\/script>',
+          );
+        });
+    </script>
+  </body>
+</html>
