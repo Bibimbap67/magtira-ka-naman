@@ -101,3 +101,7 @@ test('store sums today and this month per site', () => {
   assert.deepEqual(store.monthTotals(days, now), { total: 160, bySite: { chatgpt: 110, claude: 50 } });
   assert.deepEqual(store.todayTotals({}, now), { total: 0, bySite: {} });
 });
+
+test('every container has a "My AI drank ..." phrase for the share image', () => {
+  for (const t of water.TIERS) assert.match(t.drank, /\w/);
+});

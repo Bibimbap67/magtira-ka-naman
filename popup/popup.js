@@ -174,6 +174,19 @@
     resetBtn.classList.remove('armed');
   });
 
+  // Share: draws today's water as a story-sized PNG and saves it, ready to send to a friend.
+  const shareBtn = $('share');
+  shareBtn.addEventListener('click', async () => {
+    const days = await MKN.store.getDays();
+    const blob = await MKN.story.make(MKN.tokensToMl(totalsFrom(days).today));
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `magtira-ka-naman-${new Date().toLocaleDateString('en-CA')}.png`;
+    link.click();
+    shareBtn.textContent = 'Saved to your Downloads ✓';
+    setTimeout(() => (shareBtn.textContent = 'Share it with friends 📸'), 2500);
+  });
+
   // The switch hides the widget on chat pages (counting goes on).
   const showWidget = $('show-widget');
   chrome.storage.local.get('mknHidden').then((r) => (showWidget.checked = !r.mknHidden));

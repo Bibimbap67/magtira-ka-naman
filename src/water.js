@@ -11,15 +11,15 @@
   // container, and so on. These are game levels, not real sizes: a real bathtub
   // holds ~150 L, which almost nobody would ever reach in a day of chatting.
   const TIERS = [
-    { name: 'Glass', emoji: '🥛', fullMl: 250, quip: 'Just a little. Still okay.' },
-    { name: 'Tumbler', emoji: '🧋', fullMl: 1000, quip: 'Upgraded to a tumbler. Stay hydrated! 🧋' },
-    { name: 'Bucket', emoji: '🪣', fullMl: 3000, quip: 'A whole timba. Save some water for the rest of us! 😤' },
-    { name: 'Bathtub', emoji: '🛁', fullMl: 8000, quip: 'Enough for a bath. Magtira ka naman! 🛁' },
-    { name: 'Swimming pool', emoji: '🏊', fullMl: 20000, quip: 'Cannonball! You filled a pool. 🏊' },
-    { name: 'Dam', emoji: '🏞️', fullMl: 50000, quip: 'The dam is holding… barely. 🏞️' },
-    { name: 'Flood', emoji: '🌊', fullMl: 100000, quip: "It's a flood. You're the water interruption now. 🌊" },
-    { name: 'Mariana Trench', emoji: '🦑', fullMl: 250000, quip: 'Deeper than the Mariana Trench. Hi, anglerfish. 🦑' },
-    { name: 'Atlantis', emoji: '🏛️', fullMl: 1000000, quip: 'You found the lost city of Atlantis. 🏛️' },
+    { name: 'Glass', emoji: '🥛', fullMl: 250, drank: 'a glass of water', quip: 'Just a little. Still okay.' },
+    { name: 'Tumbler', emoji: '🧋', fullMl: 1000, drank: 'a tumbler', quip: 'Upgraded to a tumbler. Stay hydrated! 🧋' },
+    { name: 'Bucket', emoji: '🪣', fullMl: 3000, drank: 'a whole timba', quip: 'A whole timba. Save some water for the rest of us! 😤' },
+    { name: 'Bathtub', emoji: '🛁', fullMl: 8000, drank: 'a bathtub', quip: 'Enough for a bath. Magtira ka naman! 🛁' },
+    { name: 'Swimming pool', emoji: '🏊', fullMl: 20000, drank: 'a swimming pool', quip: 'Cannonball! You filled a pool. 🏊' },
+    { name: 'Dam', emoji: '🏞️', fullMl: 50000, drank: 'a dam', quip: 'The dam is holding… barely. 🏞️' },
+    { name: 'Flood', emoji: '🌊', fullMl: 100000, drank: 'a flood', quip: "It's a flood. You're the water interruption now. 🌊" },
+    { name: 'Mariana Trench', emoji: '🦑', fullMl: 250000, drank: 'the Mariana Trench', quip: 'Deeper than the Mariana Trench. Hi, anglerfish. 🦑' },
+    { name: 'Atlantis', emoji: '🏛️', fullMl: 1000000, drank: 'Atlantis', quip: 'You found the lost city of Atlantis. 🏛️' },
   ];
 
   function tokensToMl(tokens) {

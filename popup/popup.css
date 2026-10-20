@@ -1,4 +1,10 @@
 /* One look in light and dark mode, like the mockup: navy page, cream card, blue water. */
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('../fonts/bricolage-grotesque.woff2') format('woff2');
+  font-weight: 200 800;
+}
+
 :root {
   --page: #13233a;
   --page-text: #ffffff;
@@ -181,6 +187,28 @@ h1 {
   margin: 4px 0 16px;
   color: var(--ink);
   font-size: 13.5px;
+}
+
+#share {
+  display: block;
+  margin: 0 auto 16px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#share:hover {
+  filter: brightness(1.08);
+}
+
+#share:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 /* Token equivalent */
