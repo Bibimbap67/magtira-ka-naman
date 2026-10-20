@@ -181,4 +181,140 @@
 
   MKN.store.getDays().then((days) => show(totalsFrom(days)));
   MKN.store.onChange((days) => show(totalsFrom(days)));
+
+  // --- Tabs ---
+
+  const tabs = { bill: $('tab-bill'), board: $('tab-board') };
+  function showTab(name) {
+    for (const [key, tab] of Object.entries(tabs)) {
+      const on = key === name;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+      $(key).hidden = !on;
+    }
+    if (name === 'board') openBoard();
+    else clearInterval(refresh);
+  }
+  for (const [key, tab] of Object.entries(tabs)) {
+    tab.addEventListener('click', () => showTab(key));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const other = key === 'bill' ? 'board' : 'bill';
+      showTab(other);
+      tabs[other].focus();
+    });
+  }
+
+  // --- Leaderboard (the service worker does the talking to the server) ---
+
+  const ERRORS = {
+    too_short: `Use at least ${MKN.nickname.MIN} characters.`,
+    too_long: `Use at most ${MKN.nickname.MAX} characters.`,
+    bad_chars: 'Use only letters, numbers, spaces and _ - .',
+    not_allowed: "That nickname isn't allowed. Try another one.",
+    taken: 'Someone already has that nickname.',
+    too_many: 'Too many players joined from this network today. Try again tomorrow.',
+    network: "Can't reach the leaderboard right now. Try again in a bit.",
+    server_error: 'Something went wrong on the leaderboard. Try again in a bit.',
+  };
+  const say = (el, error) => (el.textContent = error ? ERRORS[error] || ERRORS.server_error : '');
+  const ask = (action, nickname) =>
+    chrome.runtime
+      .sendMessage({ type: 'board', action, nickname })
+      .then((res) => res || { ok: false, error: 'server_error' }, () => ({ ok: false, error: 'network' }));
+
+  let refresh = 0;
+  async function openBoard() {
+    const { mknBoard } = await chrome.storage.local.get('mknBoard');
+    $('board-join').hidden = !!mknBoard;
+    $('board-list').hidden = !mknBoard;
+    clearInterval(refresh);
+    if (!mknBoard) return $('join-name').focus();
+    $('me-name').textContent = mknBoard.nickname;
+    $('rename-name').value = mknBoard.nickname;
+    loadTop();
+    refresh = setInterval(loadTop, 60000);
+  }
+
+  async function loadTop() {
+    const res = await ask('top');
+    if (!res.ok) return res.error === 'not_joined' ? openBoard() : say($('board-error'), res.error);
+    say($('board-error'));
+    drawBoard(res);
+  }
+
+  const MEDALS = ['🥇', '🥈', '🥉'];
+  function cell(className, text, title) {
+    const span = document.createElement('span');
+    span.className = className;
+    span.textContent = text;
+    if (title) span.title = title;
+    return span;
+  }
+  function boardRow(p, mine) {
+    const ml = MKN.tokensToMl(p.tokens).high;
+    const { tier } = MKN.tierFor(ml);
+    const li = document.createElement('li');
+    if (mine) li.className = 'mine';
+    li.append(
+      cell('board-rank', MEDALS[p.rank - 1] || String(p.rank)),
+      cell('board-name', p.nickname),
+      cell('board-tier', tier.emoji, tier.name),
+      cell('board-ml', MKN.formatMl(ml)),
+    );
+    return li;
+  }
+  function drawBoard({ top, me, players }) {
+    $('board-count').textContent = `${players.toLocaleString('en-US')} ${players === 1 ? 'player' : 'players'}`;
+    const isMe = (p) => me && p.nickname === me.nickname;
+    const rows = top.map((p) => boardRow(p, isMe(p)));
+    if (me && !top.some(isMe)) {
+      const gap = document.createElement('li');
+      gap.className = 'board-gap';
+      gap.textContent = '···';
+      rows.push(gap, boardRow(me, true));
+    }
+    $('board-rows').replaceChildren(...rows);
+  }
+
+  // Join and rename share the same steps: check here first, then ask the server.
+  function nicknameForm(form, input, errorEl, action, done) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const local = MKN.nickname.check(input.value);
+      if (!local.ok) return say(errorEl, local.reason);
+      const button = form.querySelector('button');
+      button.disabled = true;
+      const res = await ask(action, local.nickname);
+      button.disabled = false;
+      say(errorEl, res.ok ? null : res.error);
+      if (res.ok) done();
+    });
+    input.addEventListener('input', () => say(errorEl));
+  }
+  nicknameForm($('join-form'), $('join-name'), $('join-error'), 'join', openBoard);
+  nicknameForm($('rename-form'), $('rename-name'), $('rename-error'), 'rename', () => {
+    $('board-list').querySelector('details').open = false;
+    openBoard();
+  });
+
+  // Leaving needs two clicks, like "Reset bill".
+  const leaveBtn = $('leave');
+  let leaveArmed = null;
+  leaveBtn.addEventListener('click', async () => {
+    if (!leaveArmed) {
+      leaveBtn.textContent = 'Are you sure? Click again';
+      leaveArmed = setTimeout(() => {
+        leaveArmed = null;
+        leaveBtn.textContent = 'Leave the leaderboard';
+      }, 3000);
+      return;
+    }
+    clearTimeout(leaveArmed);
+    leaveArmed = null;
+    leaveBtn.textContent = 'Leave the leaderboard';
+    const res = await ask('leave');
+    if (res.ok) openBoard();
+    else say($('rename-error'), res.error);
+  });
 })();

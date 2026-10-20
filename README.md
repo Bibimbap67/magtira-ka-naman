@@ -21,6 +21,7 @@ It's a joke project with real (but rough) numbers. Nothing you type ever leaves 
   - this month split by AI;
   - how it compares to a cup of rice 🍚.
 - **Drag the glass anywhere**, click it to fold it small, or turn it off with **Show the glass on chat pages** in the popup. Counting goes on while it's hidden.
+- **Compete on the all-time leaderboard 🏆** in the popup's **Leaderboard** tab: pick a nickname and see who is the *pinaka-uhaw sa AI* (thirstiest AI user). It's off until you join ([details](#leaderboard)).
 
 ### From a glass to Atlantis
 
@@ -67,14 +68,26 @@ Works in **Brave, Chrome and Edge** (any Chromium browser). It isn't on the Chro
 5. **Pin it.** Click the puzzle-piece icon in the toolbar, then the pin next to *Magtira Ka Naman 💧*.
 6. Open [chatgpt.com](https://chatgpt.com), [claude.ai](https://claude.ai) or [gemini.google.com](https://gemini.google.com) and send a message. The glass shows up at the bottom right and fills once the reply finishes.
 
-**Updating:** download the new version into the same folder, then click ↻ on the extension's card. Open chat tabs pick up the new version by themselves.
+**Updating:** download the new version into the same folder, then click ↻ on the extension's card. Open chat tabs pick up the new version by themselves. If an update needs a new permission, the browser may switch the extension off: just turn its switch back on.
 
 **Don't delete or move the folder** after loading it. The browser runs the extension from there.
+
+## Leaderboard
+
+Open the 💧 popup → **Leaderboard** tab → type a nickname → **Join**. You'll see the all-time top 20, with medals 🥇🥈🥉 and everyone's container (a 🦑 Mariana Trench means someone *really* likes AI), plus your own rank even if you're not in the top 20.
+
+- **What's sent:** only a random id, your nickname and your all-time token total (about once a minute while you chat). Never chat text, never your name or email.
+- **Nothing at all is sent until you press Join.** Leave any time from the same tab: you're removed from the board.
+- **Your total survives "Reset bill"**, so resetting the bill doesn't drop you down the ranks.
+- **Nicknames:** 3–20 letters, numbers, spaces and `_ - .`, unique, with a basic bad-word filter (English and Tagalog).
+- **Be honest:** totals are counted on each player's own computer, so someone could fake one. The server caps how fast a total can grow (300,000 tokens an hour), but treat the top spots with a pinch of salt. 🧂
+
+The server is a tiny free [Cloudflare Worker](server/README.md). You can run your own.
 
 ## FAQ
 
 **Does it read my chats?**
-It reads the text on the page only to count letters (~4 letters = 1 token). It saves **only numbers** (tokens per day per AI) in your browser's local storage. It makes **no network requests**, so nothing leaves your computer.
+It reads the text on the page only to count letters (~4 letters = 1 token). It saves **only numbers** (tokens per day per AI) in your browser's local storage. Unless you join the leaderboard it makes **no network requests**, and even then only your nickname and total are sent.
 
 **Why does it show a range?**
 Because the honest answer is "somewhere between a few drops and a lot". The big number is the high estimate, and the smaller one is the low estimate.
@@ -88,6 +101,7 @@ No. Only messages that appear within 2 minutes after you **send** something are 
 **What permissions does it need?**
 - `storage`, to save the numbers.
 - `scripting`, for ChatGPT, Claude and Gemini only, so open chat tabs get the new version right after an update.
+- `alarms`, and access to the leaderboard server, to send your total about once a minute if you joined.
 
 ## How it counts
 
@@ -116,14 +130,14 @@ Plain JavaScript, HTML and CSS (Manifest V3). No build step and no dependencies.
 ```bash
 npm test
 ```
-Runs the unit tests for the token, water, level and storage math (Node 18+).
+Runs the unit tests for the token, water, level and storage math, the nickname filter, and the leaderboard server and client (Node 22.5+, for its built-in SQLite).
 
 ```bash
 node dev/serve.js
 ```
 Then open:
 - `http://localhost:5317/dev/fake-chat.html`: a fake ChatGPT-style page running the real content script. Type a prompt and a reply "streams" in. Add `?fallback` to test the backup mode, or `?site=claude` for Claude-style messages.
-- `http://localhost:5317/dev/popup-preview.html`: the real popup, sharing the fake page's data.
+- `http://localhost:5317/dev/popup-preview.html`: the real popup, sharing the fake page's data. Its Leaderboard tab talks to the server set in `src/config.js` (see [server/README.md](server/README.md) to run one locally).
 
 ```
 manifest.json        extension settings (MV3)
@@ -134,8 +148,12 @@ src/store.js         saves totals in chrome.storage.local
 src/glass.js         the container drawings (waves, level, drops), used by the widget and the popup
 src/widget.js/.css   the floating glass on chat pages
 src/content.js       watches the chat and counts
-src/background.js    puts the new version into open chat tabs after an install or update
-popup/               the "Water Bill" popup
+src/background.js    puts the new version into open chat tabs; sends your total if you joined
+src/board.js         talks to the leaderboard server (used only by background.js)
+src/nickname.js      nickname rules + bad-word filter (shared with the server)
+src/config.js        the leaderboard server's address
+popup/               the popup: Water Bill and Leaderboard tabs
+server/              the leaderboard server (Cloudflare Worker + D1)
 icons/               generated by tools/make-icons.js
 dev/                 fake chat page + popup preview for local testing
 tests/               unit tests (npm test)
@@ -150,7 +168,7 @@ screenshots/         images and the install GIF for this README
 
 ## Ideas for later
 
-- Barkada leaderboard: *Pinaka-uhaw sa AI* (thirstiest AI user).
+- Weekly leaderboard races and friends-only rooms.
 - A shareable water bill image.
 - A kalamansi plant that wilts the more you prompt.
 - Publish on the Chrome Web Store / Edge Add-ons.

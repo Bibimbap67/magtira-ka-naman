@@ -52,7 +52,16 @@
   });
 
   window.chrome = {
-    runtime: { id: 'dev' },
+    runtime: {
+      id: 'dev',
+      // Stands in for background.js: the popup's leaderboard messages go to src/board.js,
+      // which talks to the local server (cd server && npx wrangler dev).
+      async sendMessage(msg) {
+        const board = (window.mknDevBoard ||= MKN.board.create({ url: MKN.BOARD_URL }));
+        const actions = { join: () => board.join(msg.nickname), rename: () => board.rename(msg.nickname), leave: board.leave, top: board.top };
+        return actions[msg.action]();
+      },
+    },
     storage: { local, onChanged: { addListener: (fn) => listeners.push(fn) } },
   };
 })();

@@ -18,7 +18,8 @@
         .then((html) => {
           document.getElementById('popup').srcdoc = html.replace(
             '<head>',
-            '<head><base href="/popup/"><script src="/dev/chrome-mock.js"><\/script>',
+            '<head><base href="/popup/"><script src="/dev/chrome-mock.js"><\/script>' +
+              '<script src="/src/config.js"><\/script><script src="/src/board.js"><\/script>',
           );
         });
     </script>

@@ -6,3 +6,8 @@ docs/superpowers/
 node_modules/
 Thumbs.db
 .DS_Store
+
+# Leaderboard server: installed tools, local test database, secrets
+server/node_modules/
+server/.wrangler/
+server/.dev.vars

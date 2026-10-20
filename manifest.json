@@ -5,9 +5,11 @@
   "description": "How much water did your AI chats use? A fun estimate from ChatGPT, Claude and Gemini tokens.",
   "permissions": [
     "storage",
-    "scripting"
+    "scripting",
+    "alarms"
   ],
   "host_permissions": [
+    "https://magtira-leaderboard.magtira-leaderboard.workers.dev/*",
     "https://chatgpt.com/*",
     "https://chat.openai.com/*",
     "https://claude.ai/*",

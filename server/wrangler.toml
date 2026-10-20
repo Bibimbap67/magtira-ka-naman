@@ -1,0 +1,8 @@
+name = "magtira-leaderboard"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "magtira-leaderboard"
+database_id = "5249c8a5-3541-4630-a18e-ab468b91125c" # yours: npx wrangler d1 create magtira-leaderboard

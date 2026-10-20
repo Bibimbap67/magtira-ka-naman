@@ -14,6 +14,12 @@
       </div>
     </header>
 
+    <nav class="tabs" role="tablist" aria-label="Views">
+      <button type="button" role="tab" id="tab-bill" aria-controls="bill" aria-selected="true">Water Bill</button>
+      <button type="button" role="tab" id="tab-board" aria-controls="board" aria-selected="false" tabindex="-1">Leaderboard 🏆</button>
+    </nav>
+
+    <div id="bill" role="tabpanel" aria-labelledby="tab-bill">
     <main class="card">
       <p class="label">Today</p>
       <p class="num" id="today-num">0</p>
@@ -80,12 +86,48 @@
       <p class="fine">
         Just an estimate: ~4 letters = 1 token, and 0.0005–0.05 mL of water per token
         (based on Google, OpenAI and UC Riverside). Hidden "thinking" tokens aren't counted.
-        No chat text is saved or sent anywhere, only numbers.
+        No chat text is saved or sent anywhere: only numbers, plus a nickname if you join the leaderboard.
       </p>
       <button id="reset" type="button">Reset bill</button>
     </footer>
+    </div>
+
+    <div id="board" role="tabpanel" aria-labelledby="tab-board" hidden>
+      <!-- Not joined yet: nothing is sent until you press Join. -->
+      <section class="ai board-join" id="board-join" hidden>
+        <h2 class="board-title">Pinaka-uhaw sa AI 🏆</h2>
+        <p class="board-text">Who has used the most water with AI, of all time? Pick a nickname to join.</p>
+        <form class="board-form" id="join-form">
+          <input id="join-name" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="Your nickname" aria-label="Nickname" />
+          <button type="submit">Join</button>
+        </form>
+        <p class="board-error" id="join-error" role="alert"></p>
+        <p class="fine">Joining sends only your nickname and your all-time water total. Never chat text.</p>
+      </section>
+
+      <!-- Joined: the all-time top 20, and your own rank. -->
+      <section class="ai board-list" id="board-list" hidden>
+        <div class="ai-head">
+          <h2>All-time ranking</h2>
+          <strong id="board-count"></strong>
+        </div>
+        <ol class="board-rows" id="board-rows"></ol>
+        <p class="board-error" id="board-error" role="alert"></p>
+        <details class="board-me">
+          <summary>You're <span id="me-name"></span> · change or leave</summary>
+          <form class="board-form" id="rename-form">
+            <input id="rename-name" type="text" maxlength="20" autocomplete="off" spellcheck="false" aria-label="New nickname" />
+            <button type="submit">Save</button>
+          </form>
+          <p class="board-error" id="rename-error" role="alert"></p>
+          <button type="button" class="board-leave" id="leave">Leave the leaderboard</button>
+        </details>
+        <p class="fine">Totals are counted on each player's own computer, so take the top spots with a pinch of salt. 🧂</p>
+      </section>
+    </div>
 
     <script src="../src/sites.js"></script>
+    <script src="../src/nickname.js"></script>
     <script src="../src/water.js"></script>
     <script src="../src/store.js"></script>
     <script src="../src/glass.js"></script>

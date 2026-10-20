@@ -1,0 +1,13 @@
+{
+  "name": "magtira-leaderboard",
+  "private": true,
+  "type": "module",
+  "description": "The Magtira Ka Naman leaderboard server (Cloudflare Worker + D1).",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.151.2"
+  }
+}
