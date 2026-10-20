@@ -5,6 +5,11 @@
 In the Philippines, when someone leans on AI for everything, their friends tease them: *magtira ka naman ng tubig*, because every prompt supposedly drinks water from some data center. This browser extension turns that joke into a meter. It watches your **ChatGPT, Claude and Gemini** chats, estimates the tokens, and shows the water filling up, from a glass all the way down to the lost city of Atlantis.
 
 <p align="center">
+  <a href="https://github.com/Bibimbap67/magtira-ka-naman/archive/refs/heads/main.zip"><img src="https://img.shields.io/badge/Download%20the%20ZIP-2f8fe0?style=for-the-badge" alt="Download the ZIP"></a><br>
+  <a href="#download-and-set-up">How to install it (about a minute)</a>
+</p>
+
+<p align="center">
   <img src="screenshots/widget.png" alt="The floating water glass on a chat page: up to 5 L, as little as 50 mL today" width="420"><br>
   <img src="screenshots/popup.png" alt="The Water Bill popup: 5 L today in a bathtub, the levels unlocked so far, and this month split by ChatGPT, Claude and Gemini" width="300">
 </p>
@@ -56,24 +61,32 @@ It's a joke project with real (but rough) numbers. Nothing you type ever leaves 
 
 ## Download and set up
 
-Works in **Brave, Chrome and Edge** (any Chromium browser). It isn't on the Chrome Web Store yet, so you load it yourself. It takes about a minute.
+Works in **Brave, Chrome and Edge** (any Chromium browser). No account, no keys, nothing to sign up for. It isn't on the Chrome Web Store yet, and browsers don't allow a one-click install from outside the store, so you load it yourself. It takes about a minute.
+
+<p align="center">
+  <a href="https://github.com/Bibimbap67/magtira-ka-naman/archive/refs/heads/main.zip"><img src="https://img.shields.io/badge/Download%20the%20ZIP-2f8fe0?style=for-the-badge" alt="Download the ZIP"></a>
+</p>
 
 ![Installing it in Brave: Code → Download ZIP, Extract all, Brave menu → Extensions, Load unpacked, pick the folder](screenshots/install.gif)
 
-1. **Download it.** On this page, click the green **Code** button → **Download ZIP**, then unzip it somewhere you'll keep it (e.g. your Documents). Or, with Git:
-   ```bash
-   git clone https://github.com/Bibimbap67/magtira-ka-naman.git
-   ```
+*(The GIF gets the ZIP from the green **Code** button. The download button above does the same thing.)*
+
+1. **Get the files.** Pick one:
+   - **ZIP (easiest):** click **Download the ZIP** above, then right-click the file → **Extract all**. Put it somewhere you'll keep it (e.g. your Documents).
+   - **Git:**
+     ```bash
+     git clone https://github.com/Bibimbap67/magtira-ka-naman.git
+     ```
 2. **Open the extensions page.** Type one of these in the address bar:
    - Brave: `brave://extensions`
    - Chrome: `chrome://extensions`
    - Edge: `edge://extensions`
 3. **Turn on Developer mode.** It's a switch in the top right (bottom left in Edge).
-4. Click **Load unpacked** and pick the unzipped `magtira-ka-naman` folder: the one that has `manifest.json` inside.
+4. Click **Load unpacked** and pick the folder that has `manifest.json` directly inside. With the ZIP that's the `magtira-ka-naman-main` folder, and Windows sometimes puts one inside another, so open them until you see `manifest.json`.
 5. **Pin it.** Click the puzzle-piece icon in the toolbar, then the pin next to *Magtira Ka Naman 💧*.
 6. Open [chatgpt.com](https://chatgpt.com), [claude.ai](https://claude.ai) or [gemini.google.com](https://gemini.google.com) and send a message. The glass shows up at the bottom right and fills once the reply finishes.
 
-**Updating:** download the new version into the same folder, then click ↻ on the extension's card. Open chat tabs pick up the new version by themselves. If an update needs a new permission, the browser may switch the extension off: just turn its switch back on.
+**Updating:** with the ZIP, download it again and extract it over the same folder (replace the files). With Git, run `git pull`. Then click ↻ on the extension's card. Open chat tabs pick up the new version by themselves. If an update needs a new permission, the browser may switch the extension off: just turn its switch back on.
 
 **Don't delete or move the folder** after loading it. The browser runs the extension from there.
 
