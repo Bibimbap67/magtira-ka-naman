@@ -35,11 +35,23 @@
     rows[id] = { bar, value };
   }
 
-  function totalsFrom(days) {
-    const month = MKN.store.monthTotals(days);
-    const sites = Object.fromEntries(siteIds.map((id) => [id, month.bySite[id] || 0]));
-    return { today: MKN.store.todayTotals(days).total, month: month.total, sites };
+  // What the card shows (main) and what the "by AI" list adds up to (list, sites), for the chosen view.
+  // All time has no list: the lifetime total isn't split by AI.
+  function totalsFrom({ days, lifetime }, view) {
+    const store = MKN.store;
+    const listed = view === 'week' ? store.weekTotals(days) : view === 'all' ? { total: 0, bySite: {} } : store.monthTotals(days);
+    const main = view === 'week' ? listed.total : view === 'all' ? lifetime : store.todayTotals(days).total;
+    const sites = Object.fromEntries(siteIds.map((id) => [id, listed.bySite[id] || 0]));
+    return { main, list: listed.total, sites };
   }
+
+  const VIEWS = {
+    today: { label: 'Today', list: 'This month by AI', when: 'today' },
+    week: { label: 'This week', list: 'This week by AI', when: 'this week' },
+    all: { label: 'All time', list: '', when: 'in total' },
+  };
+  let view = 'today';
+  let state = { days: {}, history: {}, lifetime: 0 };
 
   // One step per container. Reached: its emoji. Next one: faded. Further: "?".
   const steps = MKN.TIERS.map(() => {
@@ -67,17 +79,17 @@
 
   // Draws one frame. moving: the water is animating, so a new container bounces in.
   function paint(v, bars, moving = false) {
-    const today = MKN.tokensToMl(v.today);
+    const today = MKN.tokensToMl(v.main);
     const [num, unit] = MKN.formatMl(today.high).split(' ');
     const { index, tier, level } = MKN.tierFor(today.high);
     const next = MKN.TIERS[index + 1];
     $('today-num').textContent = num;
     $('today-unit').textContent = unit;
     $('today-low').textContent = `or as little as ${MKN.formatMl(today.low)}`;
-    $('tokens').textContent = `~${compact.format(Math.round(v.today))} tokens`;
+    $('tokens').textContent = `~${compact.format(Math.round(v.main))} tokens`;
     $('glass-pct').textContent = `${Math.round(level * 100)}% full`;
     $('vessel-line').textContent = next ? `${tier.name} · next: ${next.name}` : `${tier.name} · the last level`;
-    $('month-high').textContent = `up to ${MKN.formatMl(MKN.tokensToMl(v.month).high)}`;
+    $('month-high').textContent = `up to ${MKN.formatMl(MKN.tokensToMl(v.list).high)}`;
     for (const id of siteIds) {
       rows[id].bar.style.width = `${bars[id]}%`;
       rows[id].value.textContent = MKN.formatMl(MKN.tokensToMl(v.sites[id]).high);
@@ -106,14 +118,14 @@
   let frame = 0;
 
   // Animates from what's on screen to `next`. On first open that's from zero: the one "fill up" moment.
-  // Later increases (while the popup is open) drip into the glass first.
-  function show(next) {
-    $('today-quip').textContent = MKN.quip(MKN.tokensToMl(next.today).high);
-    $('month-rice').textContent = MKN.riceLine(MKN.tokensToMl(next.month).high);
+  // Later increases (while the popup is open) drip into the glass first; switching view doesn't (drips: false).
+  function show(next, drips = true) {
+    $('today-quip').textContent = MKN.quip(MKN.tokensToMl(next.main).high);
+    $('month-rice').textContent = MKN.riceLine(MKN.tokensToMl(next.list).high);
     cancelAnimationFrame(frame);
 
     const zeros = Object.fromEntries(siteIds.map((id) => [id, 0]));
-    const from = shown || { today: 0, month: 0, sites: zeros };
+    const from = shown || { main: 0, list: 0, sites: zeros };
     const fromBars = shownBars || zeros;
     const nextBars = barPercents(next.sites);
     if (reducedMotion()) {
@@ -124,8 +136,8 @@
     }
 
     let delay = 0;
-    if (shown && next.today > shown.today) {
-      const count = MKN.dropsFor(next.today - shown.today);
+    if (drips && shown && next.main > shown.main) {
+      const count = MKN.dropsFor(next.main - shown.main);
       for (let i = 0; i < count; i++) glass.drip(i * 140);
       delay = MKN.glass.FALL_MS;
     }
@@ -141,10 +153,10 @@
         sites[id] = lerp(from.sites[id], next.sites[id], p);
         bars[id] = lerp(fromBars[id], nextBars[id], p); // animate % so a reset drains the bars too
       }
-      shown = { today: lerp(from.today, next.today, p), month: lerp(from.month, next.month, p), sites };
+      shown = { main: lerp(from.main, next.main, p), list: lerp(from.list, next.list, p), sites };
       shownBars = bars;
       paint(shown, bars, p < 1);
-      if (!flicked && p > 0.6 && next.today > from.today) {
+      if (!flicked && p > 0.6 && next.main > from.main) {
         flicked = true;
         flickTicks();
       }
@@ -177,8 +189,7 @@
   // Share: draws today's water as a story-sized PNG and saves it, ready to send to a friend.
   const shareBtn = $('share');
   shareBtn.addEventListener('click', async () => {
-    const days = await MKN.store.getDays();
-    const blob = await MKN.story.make(MKN.tokensToMl(totalsFrom(days).today));
+    const blob = await MKN.story.make(MKN.tokensToMl(totalsFrom(state, view).main), VIEWS[view].when);
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `magtira-ka-naman-${new Date().toLocaleDateString('en-CA')}.png`;
@@ -192,8 +203,110 @@
   chrome.storage.local.get('mknHidden').then((r) => (showWidget.checked = !r.mknHidden));
   showWidget.addEventListener('change', () => chrome.storage.local.set({ mknHidden: !showWidget.checked }));
 
-  MKN.store.getDays().then((days) => show(totalsFrom(days)));
-  MKN.store.onChange((days) => show(totalsFrom(days)));
+  // --- Views: Today | This week | All time ---
+
+  // Week bars: Mon–Sun, one per day, built once.
+  const weekEls = Array.from({ length: 7 }, () => {
+    const day = document.createElement('div');
+    day.className = 'week-day';
+    const fill = document.createElement('span');
+    fill.className = 'week-fill';
+    const name = document.createElement('span');
+    day.append(fill, name);
+    $('week-bars').append(day);
+    return { day, fill, name };
+  });
+
+  const dayText = (key) => new Date(`${key}T00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+  function paintWeek() {
+    const bars = MKN.heat.weekBars(state.days);
+    const most = Math.max(...bars.map((b) => b.tokens));
+    bars.forEach((b, i) => {
+      const el = weekEls[i];
+      el.name.textContent = b.label;
+      el.fill.style.height = b.tokens ? `${(b.tokens / most) * 100}%` : '';
+      el.day.classList.toggle('today', b.today);
+      el.day.classList.toggle('empty', !b.tokens);
+      el.day.title = b.future ? dayText(b.key) : `${dayText(b.key)} · ${MKN.formatMl(MKN.tokensToMl(b.tokens).high)}`;
+    });
+  }
+
+  // Heatmap: 53 weeks of squares, built once; paintHeat only changes their colours.
+  const heatGrid = $('heat-grid');
+  const heatEls = Array.from({ length: 53 * 7 }, (_, i) => {
+    const cell = document.createElement('span');
+    cell.dataset.i = String(i);
+    heatGrid.append(cell);
+    return cell;
+  });
+  let heatCells = [];
+
+  function paintHeat() {
+    const { cells } = MKN.heat.heatCells(state.history);
+    heatCells = cells;
+    cells.forEach((c, i) => {
+      heatEls[i].className = `cell l${c.level}${c.future ? ' future' : ''}${c.today ? ' today' : ''}`;
+    });
+    const active = cells.filter((c) => c.tokens > 0);
+    const busiest = active.reduce((a, c) => (c.tokens > (a?.tokens ?? 0) ? c : a), null);
+    $('heat-count').textContent = `${active.length} active ${active.length === 1 ? 'day' : 'days'}`;
+    heatGrid.setAttribute(
+      'aria-label',
+      busiest
+        ? `${active.length} active days in the last 12 months, busiest day ${dayText(busiest.key)}`
+        : 'No active days in the last 12 months',
+    );
+    $('heat-months').replaceChildren(
+      ...MKN.heat.heatMonths(cells).map(({ col, label }) => {
+        const span = document.createElement('span');
+        span.textContent = label;
+        span.style.left = `${(col / 53) * 100}%`;
+        return span;
+      }),
+    );
+  }
+
+  // Hover or click a square: the line under the grid names that day.
+  let picked = null;
+  function pickDay(event) {
+    const cell = heatCells[event.target.dataset?.i];
+    if (!cell || cell.future) return;
+    picked?.classList.remove('picked');
+    picked = event.target;
+    picked.classList.add('picked');
+    const ml = MKN.tokensToMl(cell.tokens).high;
+    $('heat-tip').textContent = cell.tokens
+      ? `${dayText(cell.key)} · ${MKN.formatMl(ml)} · ${MKN.tierFor(ml).tier.name}`
+      : `${dayText(cell.key)} · no AI that day`;
+  }
+  heatGrid.addEventListener('mouseover', pickDay);
+  heatGrid.addEventListener('click', pickDay);
+
+  // Reads everything that's saved, then draws the chosen view.
+  async function load(drips = true) {
+    const [days, history, lifetime] = await Promise.all([MKN.store.getDays(), MKN.store.getHistory(), MKN.store.getLifetime()]);
+    state = { days, history, lifetime };
+    show(totalsFrom(state, view), drips);
+    paintWeek();
+    paintHeat();
+  }
+
+  const rangeBtns = { today: $('range-today'), week: $('range-week'), all: $('range-all') };
+  function setView(name) {
+    view = name;
+    for (const [key, btn] of Object.entries(rangeBtns)) btn.setAttribute('aria-pressed', String(key === name));
+    $('view-label').textContent = VIEWS[name].label;
+    $('ai-title').textContent = VIEWS[name].list;
+    document.querySelector('.ai').hidden = name === 'all';
+    $('week-bars').hidden = name !== 'week';
+    $('heat').hidden = name !== 'all';
+    load(false);
+  }
+  for (const [key, btn] of Object.entries(rangeBtns)) btn.addEventListener('click', () => setView(key));
+
+  load();
+  MKN.store.onChange(() => load());
 
   // --- Tabs ---
 
