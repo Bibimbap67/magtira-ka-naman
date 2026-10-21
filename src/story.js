@@ -46,8 +46,9 @@
     return [...out, line];
   }
 
-  // ml: { low, high } from tokensToMl. Resolves to a PNG Blob.
-  async function make(ml) {
+  // ml: { low, high } from tokensToMl. when: what the water covers ("today", "this week", "in total").
+  // Resolves to a PNG Blob.
+  async function make(ml, when = 'today') {
     const MKN = root.MKN;
     await document.fonts.load(`800 80px ${FONT}`);
     const { index, tier, level } = MKN.tierFor(ml.high);
@@ -73,7 +74,7 @@
     ctx.font = `800 84px ${FONT}`;
     ctx.letterSpacing = '-2px';
     ctx.fillText('My AI drank', 80, 280);
-    ctx.fillText(ml.high > 0 ? `${tier.drank} today.` : 'nothing yet.', 80, 370);
+    ctx.fillText(ml.high > 0 ? `${tier.drank} ${when}.` : 'nothing yet.', 80, 370);
     ctx.letterSpacing = '0px';
 
     ctx.drawImage(img, 200, 375);

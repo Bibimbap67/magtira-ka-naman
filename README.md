@@ -21,11 +21,12 @@ It's a joke project with real (but rough) numbers. Nothing you type ever leaves 
 - **A water glass floats on the chat page** and fills up as you chat. Its waves keep moving. When a reply finishes, drops fall in, the water rises, the numbers count up and a joke line types itself out.
 - **When a container is full, the water moves to a bigger one**, and a badge pops up: "Level 2: Tumbler 🧋". It starts over with a glass every day.
 - **Click the 💧 icon for your Water Bill:**
-  - today's water and container;
+  - a **Today / This week / All time** switch: each view keeps the container, filled against the same levels (This week adds Mon–Sun bars, All time adds a GitHub-style heatmap of the last 12 months, one square per day, darker green = less water);
   - the levels you've unlocked (the far ones stay a mystery `?`);
-  - this month split by AI;
+  - this month (or this week) split by AI;
   - how it compares to a cup of rice 🍚.
-- **Share your water 📸:** the **Share it with friends** button saves a story-sized picture (1080×1920 PNG) of today's water. Post it on Instagram or Facebook, or send it to a friend. It only has numbers on it, nothing from your chats.
+  - **Reset bill** clears Today, This week and the by-AI bars, but keeps the All time total and the heatmap.
+- **Share your water 📸:** the **Share it with friends** button saves a story-sized picture (1080×1920 PNG) of the water in the view you're on (today, this week or all time). Post it on Instagram or Facebook, or send it to a friend. It only has numbers on it, nothing from your chats.
 - **Drag the glass anywhere**, click it to fold it small, or turn it off with **Show the glass on chat pages** in the popup. Counting goes on while it's hidden.
 - **Compete on the all-time leaderboard 🏆** in the popup's **Leaderboard** tab: pick a nickname and see who is the *pinaka-uhaw sa AI* (thirstiest AI user). It's off until you join ([details](#leaderboard)).
 
@@ -162,7 +163,8 @@ manifest.json        extension settings (MV3)
 src/sites.js         per-site selectors (fix this when a site changes)
 src/tokens.js        token estimate
 src/water.js         tokens → water (mL / L), the container levels, rice, jokes, drop count
-src/store.js         saves totals in chrome.storage.local
+src/store.js         saves totals in chrome.storage.local (per day, per AI, plus a day history for the heatmap)
+src/heat.js          week bars and heatmap squares from the saved days
 src/story.js         draws the shareable story picture (PNG) for the Share button
 src/glass.js         the container drawings (waves, level, drops), used by the widget and the popup
 src/widget.js/.css   the floating glass on chat pages
